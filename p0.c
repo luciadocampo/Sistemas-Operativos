@@ -1,86 +1,22 @@
-/*Daniel Rodriguez Sanchez (daniel.rodriguez.sanchez1)
-  Lucia Docampo Rodriguez (lucia.docampo) */
 
+// AUTOR: Daniel Rodriguez Sanchez
+// AUTOR: Lucia Docampo Rodriguez
 
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <readline/readline.h>
 #include <sys/utsname.h>
+#include <sys/stat.h>
 #include <unistd.h>
 #include <time.h>
+#include <pwd.h>
+#include <grp.h>
+#include "list.h"
+#include "p1.h"
 
 #define MAX_LINE 1024
 #define MAX_TOKENS 100
-
-//lista:
-typedef struct node *list;
-typedef struct node *pos;
-
-
-#include <stdbool.h>
-struct node {
-    void *data;
-    struct node *next;
-};
-
-void init_list(list *l) {
-    *l = NULL;
-}
-
-int insert(list *l, void *comando) {
-
-     if(*l == NULL) {
-        *l = malloc(sizeof(struct node));
-        (*l)->data = comando;
-        (*l)->next = NULL;
-      } else {
-        list aux = *l;
-        while(aux->next != NULL) aux = aux->next;
-
-        aux->next = malloc(sizeof(struct node));
-        aux->next->data = comando;
-        aux->next->next = NULL;
-
-    }
-    return 0;
-}
-
-
-pos first(list l) {
-    return l;
-}
-
-pos next(list l, pos p) {
-    if(p==NULL) return NULL;
-    return p->next;
-}
-
-int end(list l, pos p) {
-    return p==NULL;
-}
-
-void *get(list l, pos p){
-    if(p == NULL){
-         return NULL;
-     }
-    return p->data;
-}
-
-void clear(list *l){
-     list aux = *l;
-     list aux_2;
-     while(aux != NULL){
-          aux_2 = aux->next;
-          free(aux);
-          aux = aux_2;
-     }
-     *l = NULL;
-}
-
-//fin lista
-
-
 
 int processCmd(char *tokens[], int ntokens, list *history);
 
@@ -125,7 +61,7 @@ int pid(char *tokens[], int ntokens, list *history){
 int carpeta(char *tokens[], int ntokens, list *history){
      char direccion [100];
      if (tokens[1]==NULL){
-     printf("%s\n", getcwd(direccion, 100));
+          printf("%s\n", getcwd(direccion, 100));
      } else{
           if (chdir(tokens[1])!=0){
                printf("Imposible cambiar directorio: No such file or directory\n");
@@ -160,8 +96,8 @@ int hist(char *tokens[], int ntokens, list *history){
           i++;
      }
      }else if(!strcmp(tokens[1], "-c")){
-          clear(history);
-     }else if(atoi(tokens[1]) != 0){
+          clear(history); //Borra la lista
+     }else if(atoi(tokens[1]) != 0){ // en caso de hist -N
           int n = -atoi(tokens[1]);
           pos p = first(*history);
           for(int i=0 ; i<=n; i++){
@@ -183,20 +119,20 @@ int comando(char *tokens[], int ntokens, list *history){
           int n = atoi(tokens[1]);
           pos p = first(*history);
           int i=0;
-          while(!end(*history, p)){
+          while(!end(*history, p)){ // sumamos i++ hasta que llega al final de la lista
            p=next(*history, p);
-           i++;
+           i++; //cuando salga del bucle i=cantidad de comandos en la lista
           }
           if(n>i){
                printf("No hay elemento %d en el historico\n", n);
           }else{
 
                int n = atoi(tokens[1]);
-               pos p = first(*history);
+               pos p = first(*history); //creamos p que apunta al primer nodo de la lista
                for(int i=0; i<n; i++){
-                    p = next(*history, p);
+                    p = next(*history, p); //avanzamos hasta la posicion donde esta el comando
                }
-               char* command = get(*history, p);
+               char* command = get(*history, p); // command es el comando que queremos repetir
                printf("Ejecutando hist (%d): %s\n", n, command);
                char* command2 = strdup(command);
                int numtokens = parseString(command2, tokens);
@@ -215,7 +151,7 @@ int infosis(char *tokens[], int ntokens, list *history){
 }
 
 int ayuda (char *tokens[], int ntokens, list *history){
-
+     //no se le puede pasar un string a un switch asi que hay que encadenar if elses
      if(tokens[1]==NULL){
           printf("'ayuda cmd' donde cmd es uno de los siguientes comandos:\n");
           printf("autores "); printf("pid "); printf("carpeta "); printf("fecha ");
@@ -251,19 +187,10 @@ int fin(char *tokens[], int ntokens, list *history) {
     return 1;
 }
 
-int salir(char *tokens[], int ntokens, list *history) {
-    return 1;
-}
-
-int bye(char *tokens[], int ntokens, list *history) {
-    return 1;
-}
-
 struct cmd {
     char *cmd_name;
     int (*cmd_fun)(char *tokens[], int ntokens, list *history);
 };
-
 
 struct cmd cmds[] = {
     {"autores", autores},
@@ -275,15 +202,20 @@ struct cmd cmds[] = {
     {"ayuda", ayuda},
     {"fecha", fecha},
     {"fin", fin},
-    {"salir", salir},
-    {"bye", bye},
+    {"salir", fin},
+    {"bye", fin},
+    {"crear", crear},
+    {"borrar", borrar},
+    {"borrarrec", borrarrec},
+    {"listfich", listfich},
+    {"listdir", listdir},
     {NULL, NULL}
 };
 
 int processCmd(char *tokens[], int ntokens, list *history) {
     int i;
     for(i=0; cmds[i].cmd_name != NULL; i++) {
-        if(strcmp(tokens[0], cmds[i].cmd_name) == 0)
+        if(strcmp(tokens[0], cmds[i].cmd_name) == 0)//si son iguales
             return cmds[i].cmd_fun(tokens, ntokens, history);
     }
 
@@ -291,13 +223,10 @@ int processCmd(char *tokens[], int ntokens, list *history) {
     return 0;
 }
 
-
 int GuardarCmd(list *history, char *line){
      insert(history, line);
      return 0;
 }
-
-
 
 int main() {
     char *line;
