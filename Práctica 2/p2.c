@@ -534,21 +534,21 @@ int memoria(char *tokens[], int ntokens, struct Listas *lista){
 // V O L C A R M E M ------------------------------------------------------------------------------------------------------
 
 int volcarmem(char *tokens[], int ntokens, struct Listas *lista){
-    char *address;
+    char *address; //puntero con una dirección de memoria donde tiene que empezar a leer
     int size;
     if(tokens[1] == NULL){
         return 0;
     }
-    address = (char*) strtoul(tokens[1], NULL, 16);
+    address = (char*) strtoul(tokens[1], NULL, 16); //estoy pasando address a hexadecimal
 
     if(tokens[2] == NULL){
         size = 25;
     }else{
         size = atoi(tokens[2]);
     }
-    int a = size / 25;
+    int a = size / 25;  //quiero que se rellenen 25 caracteres
     int b = size % 25;
-    int despl = 0;
+    int despl = 0; //
     int cont = 0;
 
     if(size < 25){
@@ -556,10 +556,10 @@ int volcarmem(char *tokens[], int ntokens, struct Listas *lista){
     }else{
         despl = 25;
     }
-    for(int i=0; i < size; i = i + 25) {
+    for(int i=0; i < size; i = i + 25) { //recorro desde el puntero address(que es una dirección de memoria) todas las direcciones de memoria que quiero, le doy el formato char ( que es lo que tiene que leer, y luego lo imprimo)
         for (int j = 0; j < despl; j++) {
             if (isprint(address[j + i])) {
-                printf("%3c", (address[j + i]));
+                printf("%3c", (address[j + i])); //formato char
             } else {
                 printf("   ");
             }
@@ -567,7 +567,7 @@ int volcarmem(char *tokens[], int ntokens, struct Listas *lista){
         printf("\n");
         for (int j = 0; j < despl; j++) {
             if (isprint(address[j + i])) {
-                printf("%3X", (address[j + i]));
+                printf("%3X", (address[j + i])); //formato hexadecimal
             } else{
                 printf(" 0");
             }
@@ -583,7 +583,7 @@ int volcarmem(char *tokens[], int ntokens, struct Listas *lista){
 
 // L L E N A R M E M ------------------------------------------------------------------------------------------------------
 
-int llenarmem(char *tokens[], int ntokens, struct Listas *lista){
+int llenarmem(char *tokens[], int ntokens, struct Listas *lista){ 
     int cont=128,i;
     char* dir;
     char A = 'A';
@@ -597,7 +597,7 @@ int llenarmem(char *tokens[], int ntokens, struct Listas *lista){
     if (tokens[3] != NULL) {
         A = (char) strtoul(tokens[3],NULL,16);
     }
-    for (i=0; i < cont; i++) {
+    for (i=0; i < cont; i++) { //recorro el arrai de direcciones y basicamente le doy un formato visible, osea, un formato de lectura, lo paso a un formato char y sobre ese formato char lo vuelvo a recorrer y ahi vuelvo a poner lo que es
         dir[i] = A;
     }
     return 0;
@@ -669,7 +669,7 @@ int readfich(char *tokens[], int ntokens, struct Listas *lista){
 
 // W R I T E F I C H  ------------------------------------------------------------------------------------------------------
 
-int writefich(char *tokens[], int ntokens, struct Listas *lista){
+int writefich(char *tokens[], int ntokens, struct Listas *lista){ 
     int cont, flags, df;
     char *dir, *nombre;
     if(!strcmp(tokens[1],"-o") && tokens[2]!=NULL && tokens[3]!=NULL &&
@@ -695,3 +695,7 @@ int writefich(char *tokens[], int ntokens, struct Listas *lista){
     close(df);
     return 0;
 }
+
+//coger la direccion que tenia o cualquier otra direccion y lo que hay en esa direccion lo tengo que pasar a un fichero
+// entonces abre el fichero, va a la direccion que tenía, la recorres, copias lo que hay en esa direccion de memoria, la copia en un char y luego lo pasa al contenido del fichero
+// si es -o tiene que sobreescribirlo 
