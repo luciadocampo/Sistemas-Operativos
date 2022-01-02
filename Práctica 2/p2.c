@@ -567,7 +567,7 @@ int volcarmem(char *tokens[], int ntokens, struct Listas *lista){
             }
         }
         printf("\n");
-        for (int j = 0; j < despl; j++) {
+        for (int j = 0; j < despl; j++) {/
             if (isprint(address[j + i])) {
                 printf("%3X", (address[j + i])); //formato hexadecimal
             } else{
