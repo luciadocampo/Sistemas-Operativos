@@ -534,34 +534,36 @@ int memoria(char *tokens[], int ntokens, struct Listas *lista){
 // V O L C A R M E M ------------------------------------------------------------------------------------------------------
 
 int volcarmem(char *tokens[], int ntokens, struct Listas *lista){
+    //muestra el contenido de (cont) bytes empezando en la dirección que se le pasa
+    
     char *address; //puntero con una dirección de memoria donde tiene que empezar a leer
     int size;
-    if(tokens[1] == NULL){
+    if(tokens[1] == NULL){ //si no hay dirección no hace nada
         return 0;
     }
-    address = (char*) strtoul(tokens[1], NULL, 16); //estoy pasando address a hexadecimal
+    address = (char*) strtoul(tokens[1], NULL, 16); //estoy pasando la dirección a hexadecimal
 
-    if(tokens[2] == NULL){
+    if(tokens[2] == NULL){ //si no se le pasa un cont, muestra 25
         size = 25;
     }else{
-        size = atoi(tokens[2]);
+        size = atoi(tokens[2]); //si no le pasamos al size el num de bytes que le pasamos
     }
     int a = size / 25;  //quiero que se rellenen 25 caracteres
     int b = size % 25;
-    int despl = 0; //
+    int despl = 0; 
     int cont = 0;
 
     if(size < 25){
         despl = size;
-    }else{
+    }else{ //para que solo imprima máx 25 por línea
         despl = 25;
     }
-    for(int i=0; i < size; i = i + 25) { //recorro desde el puntero address(que es una dirección de memoria) todas las direcciones de memoria que quiero, le doy el formato char ( que es lo que tiene que leer, y luego lo imprimo)
+    for(int i=0; i < size; i = i + 25) { //recorro desde la direcc. de mem. todas las direcciones de memoria que quiero (cont), le doy el formato char ( que es lo que tiene que leer, y luego lo imprimo)
         for (int j = 0; j < despl; j++) {
             if (isprint(address[j + i])) {
                 printf("%3c", (address[j + i])); //formato char
             } else {
-                printf("   ");
+                printf("   "); //pone en el enunciado que imprime espacio en blanco
             }
         }
         printf("\n");
@@ -574,7 +576,8 @@ int volcarmem(char *tokens[], int ntokens, struct Listas *lista){
         }
         printf("\n");
         ++cont;
-        if (cont >= a) despl = b;
+        if (cont >= a)  //a son los 25 caracteres que quiero que se rellenen //cuando cont sea mayor o igual a A, 
+            despl = b;
     }
     printf("\n");
     return 0;
@@ -583,14 +586,14 @@ int volcarmem(char *tokens[], int ntokens, struct Listas *lista){
 
 // L L E N A R M E M ------------------------------------------------------------------------------------------------------
 
-int llenarmem(char *tokens[], int ntokens, struct Listas *lista){ 
-    int cont=128,i;
+int llenarmem(char *tokens[], int ntokens, struct Listas *lista){ //llena los bytes de memoria(cont) empezando desde la dirección que se le pasa
+    int cont=128,i; //i = bytes   //cont = 128 porque lo pone en el enunciado
     char* dir;
     char A = 'A';
     if (tokens[1] == NULL) {
         return 0;
     }
-    dir = (void*)strtoul(tokens[1],NULL,16);
+    dir = (void*)strtoul(tokens[1],NULL,16); //pasa la dir a hexadecimal
     if (tokens[2] != NULL) {
         cont = atoi(tokens[2]);
     }
@@ -647,11 +650,11 @@ ssize_t LeerFichero (char *fich, void *p, ssize_t n)
 }
 
 
-int readfich(char *tokens[], int ntokens, struct Listas *lista){
+int readfich(char *tokens[], int ntokens, struct Listas *lista){ //lee cont bytes del fichero
     ssize_t cont, x;
     char *dir;
-    dir = (char*) strtoul(tokens[2],NULL,16);
-    if (tokens[3] != NULL){
+    dir = (char*) strtoul(tokens[2],NULL,16); //convierte a hexadecimal la dirección que se le pasa
+    if (tokens[3] != NULL){ //si no hay cont todo lo del fichero se lee en la dirección de memoria
         cont = atoi(tokens[3]);
     }else{
         cont = -1;
@@ -661,7 +664,7 @@ int readfich(char *tokens[], int ntokens, struct Listas *lista){
         perror("Error al abrir el archivo");
         return 0;
     } else {
-        printf("read %ld bytes of %s in %s\n", x, tokens[1], tokens[2]);
+        printf("read %ld bytes of %s in %s\n", x, tokens[1], tokens[2]); //pegunté y me dijeron que tenía que imprimir esto por pantalla
     }
 
     return 0;
@@ -672,22 +675,23 @@ int readfich(char *tokens[], int ntokens, struct Listas *lista){
 int writefich(char *tokens[], int ntokens, struct Listas *lista){ 
     int cont, flags, df;
     char *dir, *nombre;
-    if(!strcmp(tokens[1],"-o") && tokens[2]!=NULL && tokens[3]!=NULL &&
+    if(!strcmp(tokens[1],"-o") && tokens[2]!=NULL && tokens[3]!=NULL && //copié lo que hacía normal cambiando O_EXCL por O_TRUNC
        tokens[4]!=NULL){
         nombre = tokens[2];
         cont = atoi(tokens[4]);
         dir = (char*)strtoul(tokens[3],NULL, 16);
-        flags = O_WRONLY | O_CREAT | O_TRUNC;
+        flags = O_WRONLY | O_CREAT | O_TRUNC/* este lo hablé con otros compañeros */;
     } else if (tokens[1]==NULL || tokens[2]==NULL || tokens[3]==NULL){
         printf("Faltan parametros\n");
         return 0;
     } else {
-        nombre = tokens[1];
-        cont = atoi(tokens[3]);
-        dir = (char*)strtoul(tokens[2],NULL,16);
-        flags = O_WRONLY | O_CREAT | O_EXCL;
+        nombre = tokens[1];  //nombre del fichero
+        cont = atoi(tokens[3]); //cont son los nº de bytes que se escriben 
+        dir = (char*)strtoul(tokens[2],NULL,16); //convierte la dirección de mem a hexadecimal
+        flags = O_WRONLY /*solamente para escritura*/ | O_CREAT /*si el fichero no existe será creado*/  | O_EXCL/*da un error si el fichero existe*/; 
+        //le llamo flags porque en la página manual de ubuntu le llama flags
     }
-    if((df=open(nombre, flags, S_IRWXU | S_IRWXG | S_IRWXO))==-1){
+    if((df=open(nombre, flags, S_IRWXU | S_IRWXG | S_IRWXO))==-1){ //página manual ubuntu y internet
         perror("Error al abrir el archivo");
         return 0;
     }
@@ -697,5 +701,6 @@ int writefich(char *tokens[], int ntokens, struct Listas *lista){
 }
 
 //coger la direccion que tenia o cualquier otra direccion y lo que hay en esa direccion lo tengo que pasar a un fichero
-// entonces abre el fichero, va a la direccion que tenía, la recorres, copias lo que hay en esa direccion de memoria, la copia en un char y luego lo pasa al contenido del fichero
+// entonces abre el fichero, va a la direccion que tenía, la recorres, copias lo que hay en esa direccion de memoria, la copia en un char y 
+// luego lo pasa al contenido del fichero
 // si es -o tiene que sobreescribirlo 
