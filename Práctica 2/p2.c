@@ -600,8 +600,8 @@ int llenarmem(char *tokens[], int ntokens, struct Listas *lista){ //llena los by
     if (tokens[3] != NULL) {
         A = (char) strtoul(tokens[3],NULL,16);
     }
-    for (i=0; i < cont; i++) { //recorro el arrai de direcciones y basicamente le doy un formato visible, osea, un formato de lectura, lo paso a un formato char y sobre ese formato char lo vuelvo a recorrer y ahi vuelvo a poner lo que es
-        dir[i] = A;
+    for (i=0; i < cont; i++) { //recorre la dirección y va poiniendo en cada sitio el caracter que toca
+        dir[i] = A; //rellenar cada byte con el char correspondiente
     }
     return 0;
 }
